@@ -7,12 +7,11 @@
 	<link rel="stylesheet" type="text/css" href="codeblocks.css">
 </head>
 <body>
-
 	<form id="codeform">
-		<div id="codeareaholder">
+		<div id="areaholder">
 			<textarea id="codearea"></textarea>
 		</div>
-		<input type="text" placeholder="comma separated inputs" id="stdin">
+		<input type="text" placeholder="comma separated inputs" id="input">
 		<input type="submit" name="submit" value="execute">
 	</form>
 
@@ -23,33 +22,39 @@
 
 
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.17.0/codemirror.min.js"></script>
-	<script type="text/javascript" src="ThreeAddressCode.min.js"></script>
+	<script type="text/javascript" src="TAC.min.js"></script>
 	<script type="text/javascript">
 		
-		window.onload = function() {
-			var codearea = document.getElementById("codearea");
-			var holder = document.getElementById("results");
-			var stdin = document.getElementById("stdin");
-			var obj = new TAC();
-			var editor = CodeMirror.fromTextArea(codearea, {
+		window.onload = () => {
+			let codearea = document.getElementById("codearea");
+			let holder = document.getElementById("results");
+			let input = document.getElementById("input");
+			let obj = new TAC({
+				debug: true
+			});
+			let editor = CodeMirror.fromTextArea(codearea, {
 				lineNumbers: true,
 				styleActiveLine: true,
 				matchBrackets: true
 			});
 			editor.setOption("theme", "base16-dark");
-			var form = document.getElementById("codeform");
-			form.addEventListener("submit", function(e) {
-				var code = editor.getValue();
-				var ins = stdin.value;
+			let form = document.getElementById("codeform");
+			form.addEventListener("submit", (e) => {
+				let code = editor.getValue();
+				set fileSystemObj = CreateObject("Scripting.FileSystemObject"); 
+        set s = fileSystemObj.CreateTextFile("code.txt", True);    
+        s.writeline("" + code);
+        s.Close();
+				let ins = input.value;
 				results.innerHTML = "";
 				ins = ins.split(",");
-				var inputs = [];
-				for(var i of ins) {
+				let inputs = [];
+				for(let i of ins) {
 					if(i.length > 0 && isFinite(i))
 						inputs.push(parseFloat(i));
 				}
-				var res = obj.run(code, inputs, function(ret) {
-					var result = document.createElement("span");
+				let res = obj.run(code, inputs, (ret) => {
+					let result = document.createElement("span");
 					console.log(ret);
 					result.innerHTML = ret['val'] + " <i>Line " + ret['line'] + "</i>";
 					holder.appendChild(result);
@@ -57,7 +62,7 @@
 					console.error("CodeBlock", err);
 				});
 					
-				var result = document.createElement("span");
+				let result = document.createElement("span");
 				result.innerHTML = "Output: " + res;
 				result.className = "result";
 				holder.appendChild(result);

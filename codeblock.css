@@ -36,7 +36,7 @@ textarea#codearea {
 	height: 100%;
 }
 
-#codeareaholder {
+#areaholder {
 	width: 50vw;
 	height: 70vh;
 	position: absolute;
@@ -44,7 +44,7 @@ textarea#codearea {
 	left: 10vw;
 }
 
-#codeareaholder > div {
+#areaholder > div {
 	width: 100%;
 	height: 100%;
 }

@@ -1,0 +1,22 @@
+{
+  "name": "c-minus",
+  "version": "1.0.0",
+  "description": "README",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vic3r/C-Minus.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vic3r/C-Minus/issues"
+  },
+  "homepage": "https://github.com/vic3r/C-Minus#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}

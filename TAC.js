@@ -1,3 +1,31 @@
+createRegex: () => {
+	let Rx = {};
+	Rx['int'] = "[0-9]+";
+	Rx['float'] = "[0-9]+.[0-9]+";
+	Rx['string'] = "[a-zA-Z0-9]*";
+	Rx['char'] = "[a-zA-Z0-9]{0,1}";
+	Rx['var'] = "[a-zA-Z][a-zA-Z0-9]*(\\[([0-9]+|[a-zA-Z][a-zA-Z0-9]*)\\])?";
+	Rx['constant'] = "[0-9]+";
+	Rx['op'] = "[\\*\\-\\+\\/\\&\\=\\<\\!\\>\\%]+";
+	Rx['goto'] = "(\\s+)?goto(\\s+)(" + Rx.var + ")(\\s+)?";
+	Rx['exp'] = "(\\s+)?((((" + Rx.var + ")|(" + Rx.constant + "))?(\\s+)?(" + Rx.op + ")(\\s+)?((" + Rx.var + ")|(" + Rx.constant + ")))|(" + Rx.var + ")|(" + Rx.constant + "))";
+	Rx['exp_int'] = "(\\s+)?((((" + Rx.int + ")|(" + Rx.constant + "))?(\\s+)?(" + Rx.op + ")(\\s+)?((" + Rx.int + ")|(" + Rx.constant + ")))|(" + Rx.int + ")|(" + Rx.constant + "))";
+	Rx['exp_float'] = "(\\s+)?((((" + Rx.float + ")|(" + Rx.constant + "))?(\\s+)?(" + Rx.op + ")(\\s+)?((" + Rx.float + ")|(" + Rx.constant + ")))|(" + Rx.float + ")|(" + Rx.constant + "))";
+	Rx['exp_string'] = "(\\s+)?((((" + Rx.string + ")|(" + Rx.constant + "))?(\\s+)?(" + Rx.op + ")(\\s+)?((" + Rx.string + ")|(" + Rx.constant + ")))|(" + Rx.string + ")|(" + Rx.constant + "))";
+	Rx['exp_char'] = "(\\s+)?((((" + Rx.char + ")|(" + Rx.constant + "))?(\\s+)?(" + Rx.op + ")(\\s+)?((" + Rx.char + ")|(" + Rx.constant + ")))|(" + Rx.char + ")|(" + Rx.constant + "))";
+	Rx['method'] = '(\\s+)?call\\s+(' + Rx.var + ')(\\s+)?,(\\s+)?(' + Rx.exp + ')(\\s+)?';
+	Rx['method_int'] = '(\\s+)?call\\s+(' + Rx.int + ')(\\s+)?,(\\s+)?(' + Rx.exp_int + ')(\\s+)?';
+	Rx['method_float'] = '(\\s+)?call\\s+(' + Rx.float + ')(\\s+)?,(\\s+)?(' + Rx.exp_float + ')(\\s+)?';
+	Rx['method_string'] = '(\\s+)?call\\s+(' + Rx.string + ')(\\s+)?,(\\s+)?(' + Rx.exp_string + ')(\\s+)?';
+	Rx['method_char'] = '(\\s+)?call\\s+(' + Rx.char + ')(\\s+)?,(\\s+)?(' + Rx.exp_char + ')(\\s+)?';
+	Rx['return'] = "(\\s+)?return(\\s+(" + Rx.exp + "))?(\\s+)?";
+	Rx['print'] = "(\\s+)?print\\s+(" + Rx.exp + ")(\\s+)?";
+	Rx['if'] = "(\\s+)?if\\s+(" + Rx.exp + ")\\s+((" + Rx.exp + ")|(" + Rx.goto + ")|(" + Rx.return + ")|(" + Rx.print + "))(\\s+)?";
+	Rx['param'] = "(\\s+)?param\\s+(" + Rx.exp + ")(\\s+)?";
+	Rx['def_method'] = '(\\s+)?Entry: \\s+(' + Rx.var + ')(\\s+)?,(\\s+)?(' + Rx.constant + ')(\\s+)?';
+	Rx['end_method'] = "(\\s+)?End: (\\s+)?";
+	return Rx
+}
 
 let TAC = (Config) => {
 	let Lines = [];
@@ -12,20 +40,7 @@ let TAC = (Config) => {
 	let StdErr;
 
 	//Regex definition
-	let Rx = {};
-	Rx['var'] = "[a-zA-Z][a-zA-Z0-9]*(\\[([0-9]+|[a-zA-Z][a-zA-Z0-9]*)\\])?";
-	Rx['constant'] = "[0-9]+";
-	Rx['op'] = "[\\*\\-\\+\\/\\&\\=\\<\\!\\>\\%]+";
-	Rx['goto'] = "(\\s+)?goto(\\s+)(" + Rx.var + ")(\\s+)?";
-	Rx['exp'] = "(\\s+)?((((" + Rx.var + ")|(" + Rx.constant + "))?(\\s+)?(" + Rx.op + ")(\\s+)?((" + Rx.var + ")|(" + Rx.constant + ")))|(" + Rx.var + ")|(" + Rx.constant + "))";
-	Rx['method'] = '(\\s+)?call\\s+(' + Rx.var + ')(\\s+)?,(\\s+)?(' + Rx.exp + ')(\\s+)?';
-	Rx['return'] = "(\\s+)?return(\\s+(" + Rx.exp + "))?(\\s+)?";
-	Rx['print'] = "(\\s+)?print\\s+(" + Rx.exp + ")(\\s+)?";
-	Rx['if'] = "(\\s+)?if\\s+(" + Rx.exp + ")\\s+((" + Rx.exp + ")|(" + Rx.goto + ")|(" + Rx.return + ")|(" + Rx.print + "))(\\s+)?";
-	Rx['param'] = "(\\s+)?param\\s+(" + Rx.exp + ")(\\s+)?";
-	Rx['def_method'] = '(\\s+)?BeginFunc\\s+(' + Rx.var + ')(\\s+)?,(\\s+)?(' + Rx.constant + ')(\\s+)?';
-	Rx['end_method'] = "(\\s+)?EndFunc(\\s+)?";
-
+	let Rx = createRegex()
 	let isMethodDef = false;
 	let methodName = "root";
 
@@ -119,7 +134,7 @@ let TAC = (Config) => {
 	this.debug = () => {
 		if(!debug) return false;
 
-		//console.log(Rx, Heap, Lines, Indexes, Parameters, Operations);
+		console.log(Rx, Heap, Lines, Indexes, Parameters, Operations);
 		return Heap;
 	}
 
@@ -324,11 +339,94 @@ let TAC = (Config) => {
 			} else {
 				throw {'message': "Invalid Method call '"+ method + "' with " + paramlength + " Parameters", 'code': 107};
 			}
+		
+		}	
+			else if (exp.match(Rx.method_int)) {
+				let list = exp.match(Rx.method_int);
+	
+				let method_int = list[2];
+				let paramlength = list[7];
+	
+				if(isMethod(method_int) && Parameters.length >= paramlength) {
+	
+					attribs = Parameters.slice(0, paramlength);
+					Parameters = Parameters.slice(paramlength);
+	
+					let ret = Operations[method_int].compiler.run("", attribs, StdOut);
+	
+					if (typeof ret != "undefined")
+						Heap['out'] = ret;
+	
+				} else {
+					throw {'message': "Invalid Method call '"+ method_int + "' with " + paramlength + " Parameters", 'code': 107};
+				}
+			}
+			else if (exp.match(Rx.method_float)) {
+				let list = exp.match(Rx.method_float);
 
-		} else if (exp.match(Rx.param)) {
+				let method_float = list[2];
+				let paramlength = list[7];
+
+				if(isMethod(method_float) && Parameters.length >= paramlength) {
+
+					attribs = Parameters.slice(0, paramlength);
+					Parameters = Parameters.slice(paramlength);
+
+					let ret = Operations[method_float].compiler.run("", attribs, StdOut);
+
+					if (typeof ret != "undefined")
+						Heap['out'] = ret;
+
+				} else {
+					throw {'message': "Invalid Method call '"+ method_float+ "' with " + paramlength + " Parameters", 'code': 107};
+				}
+			}
+			else if (exp.match(Rx.method_string)) {
+				let list = exp.match(Rx.method_string);
+	
+				let method_string = list[2];
+				let paramlength = list[7];
+	
+				if(isMethod(method_string) && Parameters.length >= paramlength) {
+	
+					attribs = Parameters.slice(0, paramlength);
+					Parameters = Parameters.slice(paramlength);
+	
+					let ret = Operations[method_string].compiler.run("", attribs, StdOut);
+	
+					if (typeof ret != "undefined")
+						Heap['out'] = ret;
+	
+				}
+				else {
+					throw {'message': "Invalid Method call '"+ method_string + "' with " + paramlength + " Parameters", 'code': 107};
+				}
+			}
+			else if (exp.match(Rx.method_char)) {
+				let list = exp.match(Rx.method_char);
+	
+				let method_char = list[2];
+				let paramlength = list[7];
+	
+				if(isMethod(method_char) && Parameters.length >= paramlength) {
+	
+					attribs = Parameters.slice(0, paramlength);
+					Parameters = Parameters.slice(paramlength);
+	
+					let ret = Operations[method_char].compiler.run("", attribs, StdOut);
+	
+					if (typeof ret != "undefined")
+						Heap['out'] = ret;
+	
+				}
+				else {
+					throw {'message': "Invalid Method call '"+ method_char + "' with " + paramlength + " Parameters", 'code': 107};
+				}
+			}
+		
+			else if (exp.match(Rx.param)) {
 
 			let cond = exp.match(Rx.param)[2];
-
 			Parameters.push(evaluate(cond));
 
 		} else if(exp.match(Rx.def_method)) {
@@ -362,35 +460,35 @@ let TAC = (Config) => {
 	}
 
 	let build = () => {
-		for(let pos in Lines) {
-			let line = Lines[pos];
+		for(let position in Lines) {
+			let line = Lines[position];
 
 			if(line.indexOf(":") != -1) {
-				Indexes[line.substr(0, line.indexOf(":")).replace(/\s+/, "")] = parseInt(pos);
+				Indexes[line.substr(0, line.indexOf(":")).replace(/\s+/, "")] = parseInt(position);
 			}
 		}
 
-		let pos = 0;
-		while(pos < Lines.length) {
-			let line = Lines[pos];
+		let position = 0;
+		while(position < Lines.length) {
+			let line = Lines[position];
 
 			try {
-				handleSpecialExp(line, pos);
+				handleSpecialExp(line, position);
 			} catch(err) {
 				if(typeof err == "object" && typeof err['label'] != "undefined") {
-					pos = err['label']-1;
+					position = err['label']-1;
 				} else if(typeof err == "object" && typeof err['return'] != "undefined") { 
 					return err['return'];
 				} else if(typeof err == "object" && typeof err['print'] != "undefined") { 
-					Outputs.push({val:err['print'], line: pos+1});
+					Outputs.push({val:err['print'], line: position+1});
 					if (typeof StdOut == "function")
-						StdOut({val:err['print'], line: pos+1});
+						StdOut({val:err['print'], line: position+1});
 				} else {
 					if(typeof err == "object") {
-						err['message'] += " in line " + (pos+1);
-						err['line'] = pos+1;
+						err['message'] += " in line " + (position+1);
+						err['line'] = position+1;
 					} else {
-						err = {'message': err, 'line': pos+1, 'code': 120};
+						err = {'message': err, 'line': position+1, 'code': 120};
 					}
 
 					if(typeof StdErr == "function")
@@ -401,7 +499,7 @@ let TAC = (Config) => {
 				}
 			}
 
-			pos++;
+			position++;
 		}
 
 		return true;
